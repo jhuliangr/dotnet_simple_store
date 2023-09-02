@@ -1,0 +1,38 @@
+bin/
+obj/
+
+# Archivos de configuración de Visual Studio
+.vscode/
+*.suo
+*.user
+*.psess
+
+# Archivos de compilación
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.ipch
+*.ilk
+*.bak
+
+# Archivos de publicación
+*.publish.xml
+*.deploy.cmd
+*.deploy-readme.txt
+
+# Archivos temporales
+*.tmp
+*.swp
+*~
+
+# Archivos de paquetes NuGet
+*.nupkg
+**/packages/*
+!**/packages/*.targets
+!**/packages/*.props
+
+# bootstrap and open-iconic
+**/open-iconic/*
+bootstrap.*

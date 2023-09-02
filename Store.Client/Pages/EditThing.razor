@@ -1,0 +1,95 @@
+﻿@using Models 
+@inject NavigationManager NavigationManager
+@page "/edit"
+@page "/edit/{Id:int}"
+<PageTitle> Edit Page</PageTitle>
+<h2>@Title</h2>
+<div class="row justify-content-center align-items-center g-2">
+    <div class="col-sm-4">
+        @if(thing is null){
+            <p class="success"><em>Loading...</em></p>
+        }
+        else
+        {
+            <EditForm Model="@thing" OnValidSubmit="HandleSubmit" >
+                <DataAnnotationsValidator/>
+                <div class="mb-3">
+                    <label for="Name" class="form-label">
+                        Name:
+                    </label>
+                    <InputText id="Name" @bind-Value="thing.Name" class="form-control"/>
+                </div>
+                <div class="mb-3">
+                    <label for="Description" class="form-label">
+                        Description:
+                    </label>
+                    <InputText id="Description" @bind-Value="thing.Description" class="form-control"></InputText>
+                </div>
+                <div class="btn-group btn-group-md">
+                    <button type="submit" class="btn btn-outline-primary btn-huge px-5">Save</button>
+                    <button type="submit" class="btn btn-outline-secondary btn-huge px-5" @onclick="@Cancel">Cancel</button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? Id {get; set;}
+
+    private string Title = string.Empty;
+    private void HandleSubmit()
+    {
+        if (thing!.Id == 0)
+        {
+            Thing[] Things = ThingClient.GetThings();
+
+            if(Things.Count() == 0)
+            {
+                thing.Id = 1;
+            }
+            else
+            {
+                thing.Id = ThingClient.GetThings().Max(Th => Th.Id) + 1;
+            }
+            ThingClient.AddThing(thing);   
+        }
+        else 
+        {
+            ThingClient.UpdateThing(thing);
+        }
+        NavigationManager.NavigateTo("/");
+    }
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+    private Thing? thing;
+
+        protected override void OnParametersSet()
+        {
+            if (Id is not null)
+            {
+                Thing th =  ThingClient.GetThing(Id.Value);
+                thing = new()
+                {
+                    Id = Id.Value,
+                    Name = th.Name,
+                    Description = th.Description
+                };
+                Title = $"Edit {thing.Name}";
+            }
+            else
+            {
+               thing = new()
+                {
+                    Id = 0,
+                    Name = "",
+                    Description = ""
+                };
+                
+                Title = "New Thing";
+            }
+        }
+}

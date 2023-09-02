@@ -1,0 +1,75 @@
+﻿@page "/"
+@using Models
+@inject NavigationManager NavigationManager
+
+<PageTitle>Simple Store</PageTitle>
+
+<h1>Hello, Welcome to the <strong>Simple Store</strong></h1>
+
+The website where you store things... I guess
+@if(Things is null)
+{
+    <p><em>Loading...</em></p>
+}
+else{
+    <div class="container">
+        <DeleteThing Thing="@currentThing" OnClose="@OnDeleteModalClose"/>
+        <div class="row">
+            <div class="col">
+                <table class="table my-5 table-dark table-striped table-hover table-bordered" >
+                    <thead class="">
+                        <th>Id</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </thead>
+                    <tbody>
+                        @foreach(var thing in Things)
+                        {
+                            <tr>
+                                <td>@thing.Id</td>
+                                <td>@thing.Name</td>
+                                <td>@thing.Description</td>
+                                <td>
+                                    <button class="btn btn-outline-primary" @onclick="(()=>EditThing(thing.Id))">
+                                        <i class="oi oi-pencil"/>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-danger" @onclick="(()=> currentThing = thing)" data-bs-toggle="modal" data-bs-target="#DeleteModal">
+                                        <i class="oi oi-x"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a class="btn btn-primary" href="/edit" role="button">Add</a>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+}
+
+@code{
+    private Thing[]? Things;
+    private Thing? currentThing;
+    protected override void OnInitialized()
+    {
+        Things = ThingClient.GetThings();
+    }
+    private void EditThing(int Id)
+    {
+        NavigationManager.NavigateTo($"/edit/{Id}");
+    }
+    private void OnDeleteModalClose(bool Accepted)
+    {
+        if (Accepted)
+        {
+            ThingClient.DeleteThing(currentThing!.Id);
+            Things = ThingClient.GetThings();
+        }
+    }
+}

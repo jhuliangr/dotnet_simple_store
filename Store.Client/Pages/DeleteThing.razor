@@ -1,0 +1,42 @@
+﻿@using Models
+@inject NavigationManager NavigationManager 
+
+<div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                        <h5 class="modal-title" id="DeleteModalLabel">@Title</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+            @* <div class="modal-body">
+                <div class="container-fluid">
+                    Add rows here
+                </div>
+            </div> *@
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="@Cancel">Close</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="@Confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Thing? Thing { get; set;}
+    [Parameter]
+    public EventCallback<bool> OnClose {get; set;}
+    private string Title = string.Empty;
+    protected override void OnParametersSet()
+    {
+        Title = $"Delete {Thing?.Name}";
+    }
+    private void Confirm()
+    {
+        OnClose.InvokeAsync(true);
+    }
+    private void Cancel()
+    {
+        OnClose.InvokeAsync(false);
+    }
+}
