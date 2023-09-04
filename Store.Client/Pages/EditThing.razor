@@ -1,5 +1,6 @@
 ﻿@using Models 
 @inject NavigationManager NavigationManager
+@inject ThingClient Client
 @page "/edit"
 @page "/edit/{Id:int}"
 <PageTitle> Edit Page</PageTitle>
@@ -11,7 +12,7 @@
         }
         else
         {
-            <EditForm Model="@thing" OnValidSubmit="HandleSubmit" >
+            <EditForm Model="@thing" OnValidSubmit="HandleSubmitAsync" >
                 <DataAnnotationsValidator/>
                 <div class="mb-3">
                     <label for="Name" class="form-label">
@@ -39,25 +40,25 @@
     public int? Id {get; set;}
 
     private string Title = string.Empty;
-    private void HandleSubmit()
+    private async Task HandleSubmitAsync()
     {
         if (thing!.Id == 0)
         {
-            Thing[] Things = ThingClient.GetThings();
+            Thing[]? Things = await Client.GetThingsAsync(); 
 
-            if(Things.Count() == 0)
+            if(Things!.Count() == 0)
             {
                 thing.Id = 1;
             }
             else
             {
-                thing.Id = ThingClient.GetThings().Max(Th => Th.Id) + 1;
+                thing.Id = Things!.Max(Th => Th.Id) + 1;
             }
-            ThingClient.AddThing(thing);   
+            await Client.AddThingAsync(thing);   
         }
         else 
         {
-            ThingClient.UpdateThing(thing);
+            await Client.UpdateThingASync(thing);
         }
         NavigationManager.NavigateTo("/");
     }
@@ -67,11 +68,11 @@
     }
     private Thing? thing;
 
-        protected override void OnParametersSet()
+        protected override async Task OnParametersSetAsync()
         {
             if (Id is not null)
             {
-                Thing th =  ThingClient.GetThing(Id.Value);
+                Thing th =  await Client.GetThingAsync(Id.Value);
                 thing = new()
                 {
                     Id = Id.Value,

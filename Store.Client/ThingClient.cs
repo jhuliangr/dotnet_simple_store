@@ -1,48 +1,43 @@
 using Store.Client.Models;
+using System.Net.Http.Json;
 
 namespace Store.Client
 {
-    public static class ThingClient
+    public class ThingClient
     {
-        private static List<Thing> Things = new () 
-        {   
-            new Thing()
-            {
-                Id = 1,
-                Name = "Pollo",
-                Description = "Emplumado animal que a veces vuela y a veces no..."
-            },
-            new Thing()
-            {
-                Id = 2,
-                Name = "Pensamiento",
-                Description = "Por si pensaste que lo de cosa era abstracto, soprendete maifren"
-            }
+        private readonly HttpClient HttpClient;
 
-        }; 
-        public static Thing[] GetThings()
+        public ThingClient(HttpClient Http)
         {
-            return Things.ToArray();
-        }
-        public static void AddThing(Thing thing)
-        {
-            Things.Add(thing);
+            this.HttpClient = Http;
         }
 
-        public static Thing GetThing(int id)
+        public async Task<Thing[]?> GetThingsAsync()
         {
-            return Things.Find(Th => Th.Id == id ) ?? throw new Exception("Could not find the thing you are asking for");
+            return await HttpClient.GetFromJsonAsync<Thing[]>("api/things");
         }
-        public static void UpdateThing(Thing UpdatedThing)
+
+        public async Task<Thing> GetThingAsync(int id)
         {
-            Thing prevThing = GetThing(UpdatedThing.Id);
-            prevThing.Name = UpdatedThing.Name;
-            prevThing.Description = UpdatedThing.Description;
+            return await  HttpClient.GetFromJsonAsync<Thing>($"api/things/{id}") 
+                ?? throw new Exception("Didnt find the Thing you are looking for");
+
         }
-        public static void DeleteThing(int Id)
+
+        public async Task AddThingAsync(Thing thing)
         {
-            Thing Th = GetThing(Id);
-            Things.Remove(Th);
+            await HttpClient.PostAsJsonAsync("api/thing",thing);
         }
+
+        public async Task UpdateThingASync(Thing UpdatedThing)
+        {
+            await HttpClient.PutAsJsonAsync($"api/thing", UpdatedThing);
+        }
+
+        public async Task DeleteThingAsync(int Id)
+        {
+            await HttpClient.DeleteAsync($"api/thing/{Id}");
+        }
+
     }
 }
