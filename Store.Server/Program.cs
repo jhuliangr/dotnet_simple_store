@@ -6,14 +6,14 @@ List<Thing> Things = new ()
     new Thing()
     {
         Id = 1,
-        Name = "Pollo",
-        Description = "Emplumado animal que a veces vuela y a veces no..."
+        Name = "Object 1",
+        Description = "Test Object number one"
     },
     new Thing()
     {
         Id = 2,
-        Name = "Pensamiento",
-        Description = "Por si pensaste que lo de cosa era abstracto, soprendete maifren"
+        Name = "Object 2",
+        Description = "This might by the test object number two"
     }
 
 }; 
