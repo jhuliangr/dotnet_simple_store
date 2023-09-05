@@ -59,6 +59,20 @@ a, .btn-link {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+.table-container {
+    border-radius: 10px;
+    max-height: 70vh;
+    overflow-y: auto;
+    width: 100%;
+    background-color: rgb(40, 38, 38);
+}
+.table thead {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+}
+

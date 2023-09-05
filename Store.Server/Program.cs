@@ -30,9 +30,16 @@ app.UseCors();
 
 
 // GET All
-app.MapGet("/api/things", async (StoreDbContext context) => 
-    await context.Things.AsNoTracking().ToListAsync()
-);
+app.MapGet("/api/things", async (string? filter,StoreDbContext context) =>
+{
+    var things = context.Things.AsNoTracking();
+    // if theres a filter, then send the information wich contains it. Else just send ALL the data 
+    if (filter is not null)
+    {
+        things = things.Where(th => th.Name.Contains(filter) || th.Description.Contains(filter));  
+    }
+    return await things.ToListAsync();
+});
 
 // GET one
 app.MapGet("/api/things/{Id}",async (int Id, StoreDbContext context) => 

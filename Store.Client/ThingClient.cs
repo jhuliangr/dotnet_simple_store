@@ -12,9 +12,10 @@ namespace Store.Client
             this.HttpClient = Http;
         }
         // GET ALL
-        public async Task<Thing[]?> GetThingsAsync()
+        public async Task<Thing[]?> GetThingsAsync(string? filter)
         {
-            return await HttpClient.GetFromJsonAsync<Thing[]>("api/things");
+            // Sending the filter to the API as query
+            return await HttpClient.GetFromJsonAsync<Thing[]>($"api/things?filter={filter}");
         }
         // GET one
         public async Task<Thing> GetThingAsync(int id)
