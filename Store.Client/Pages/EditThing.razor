@@ -40,23 +40,41 @@
     public int? Id {get; set;}
 
     private string Title = string.Empty;
+    // Setting page's title on parameters set
+    protected override async Task OnParametersSetAsync()
+    {
+        // If it is'nt null title will contain the object's name
+        if (Id is not null)
+        {
+            Thing th =  await Client.GetThingAsync(Id.Value);
+            thing = new()
+            {
+                Id = Id.Value,
+                Name = th.Name,
+                Description = th.Description
+            };
+            Title = $"Edit {thing.Name}";
+        }
+        else // if not, just new thing
+        {
+            thing = new()
+            {
+                Id = 0,
+                Name = "",
+                Description = ""
+            };
+            Title = "New Thing";
+        }
+    }
+    // Handle submitting the form
     private async Task HandleSubmitAsync()
     {
+        // if its Id equals 0 it means it is a new thing
         if (thing!.Id == 0)
         {
-            Thing[]? Things = await Client.GetThingsAsync(); 
-
-            if(Things!.Count() == 0)
-            {
-                thing.Id = 1;
-            }
-            else
-            {
-                thing.Id = Things!.Max(Th => Th.Id) + 1;
-            }
             await Client.AddThingAsync(thing);   
         }
-        else 
+        else // Update the existing thing
         {
             await Client.UpdateThingASync(thing);
         }
@@ -68,29 +86,4 @@
     }
     private Thing? thing;
 
-        protected override async Task OnParametersSetAsync()
-        {
-            if (Id is not null)
-            {
-                Thing th =  await Client.GetThingAsync(Id.Value);
-                thing = new()
-                {
-                    Id = Id.Value,
-                    Name = th.Name,
-                    Description = th.Description
-                };
-                Title = $"Edit {thing.Name}";
-            }
-            else
-            {
-               thing = new()
-                {
-                    Id = 0,
-                    Name = "",
-                    Description = ""
-                };
-                
-                Title = "New Thing";
-            }
-        }
 }

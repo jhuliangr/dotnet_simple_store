@@ -4,6 +4,7 @@ namespace Store.Server.Models;
 
 public class Thing
 {
+    [Key]
     public int Id { get; set; }
     [Required]
     [StringLength(50)]

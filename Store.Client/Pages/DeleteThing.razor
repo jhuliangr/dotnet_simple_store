@@ -8,11 +8,6 @@
                         <h5 class="modal-title" id="DeleteModalLabel">@Title</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-            @* <div class="modal-body">
-                <div class="container-fluid">
-                    Add rows here
-                </div>
-            </div> *@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="@Cancel">Close</button>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @onclick="@Confirm">Delete</button>
@@ -27,6 +22,7 @@
     [Parameter]
     public EventCallback<bool> OnClose {get; set;}
     private string Title = string.Empty;
+    // Set title depending on the object's name
     protected override void OnParametersSet()
     {
         Title = $"Delete {Thing?.Name}";

@@ -38,6 +38,7 @@ else{
                                     </button>
                                 </td>
                                 <td>
+                                    @* Setting CurrentThing on click event *@
                                     <button class="btn btn-outline-danger" @onclick="(()=> currentThing = thing)" data-bs-toggle="modal" data-bs-target="#DeleteModal">
                                         <i class="oi oi-x"/>
                                     </button>
@@ -55,21 +56,29 @@ else{
 }
 
 @code{
+    // Array to store what the API sends
     private Thing[]? Things;
+    // Pointer for deletion
     private Thing? currentThing;
+
+    // Getting from API the data when the page initialices
     protected override async Task OnInitializedAsync()
     {
         Things = await Client.GetThingsAsync(); 
     }
+    // Go to Edit page
     private void EditThing(int Id)
     {
         NavigationManager.NavigateTo($"/edit/{Id}");
     }
+    // if accepted in the modal then delete
     private async Task OnDeleteModalCloseAsync(bool Accepted)
     {
         if (Accepted)
         {
+            // Delete
             await Client.DeleteThingAsync(currentThing!.Id);
+            // Reload objects
             Things = await Client.GetThingsAsync();
         }
     }

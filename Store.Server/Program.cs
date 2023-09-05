@@ -1,25 +1,13 @@
+//Minimal API
 using Store.Server.Models;
+using Store.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
-
-List<Thing> Things = new () 
-{   
-    new Thing()
-    {
-        Id = 1,
-        Name = "Object 1",
-        Description = "Test Object number one"
-    },
-    new Thing()
-    {
-        Id = 2,
-        Name = "Object 2",
-        Description = "This might by the test object number two"
-    }
-
-}; 
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CORS configuration for this API
 builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
 {
     builder.WithOrigins("https://localhost:7043")
@@ -27,16 +15,30 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
            .AllowAnyHeader();
 }));
 
+// Setting the MySql Version im using
+var serverVersion = new MySqlServerVersion(new Version(10, 4, 11));
+
+builder.Services.AddDbContext<StoreDbContext>(options =>
+        options.UseMySql(builder.Configuration.GetConnectionString("MySqlConnection"), 
+        serverVersion
+));
+
 var app = builder.Build();
 
+// Using the CORS configuration
 app.UseCors();
 
-app.MapGet("/api/things", () => Things);
 
-app.MapGet("/api/things/{Id}", (int Id) => 
+// GET All
+app.MapGet("/api/things", async (StoreDbContext context) => 
+    await context.Things.AsNoTracking().ToListAsync()
+);
+
+// GET one
+app.MapGet("/api/things/{Id}",async (int Id, StoreDbContext context) => 
 {
     //read
-    Thing? Thing = Things.Find(th => th.Id == Id);
+    Thing? Thing = await context.Things.FindAsync(Id);
     if(Thing is null)
     {
         return Results.NotFound();
@@ -45,47 +47,35 @@ app.MapGet("/api/things/{Id}", (int Id) =>
 })
 .WithName("GetThing");
 
-app.MapPost("/api/thing", (Thing thing)=>
+//POST 
+app.MapPost("/api/thing", async (Thing thing, StoreDbContext context)=>
 {
-    
     //create
-    if(Things.Count() == 0)
-    {
-        thing.Id = 1;
-    }
-    else
-    {
-        thing.Id = Things.Max(Th => Th.Id) + 1;
-    }
-    Things.Add(thing);
+    context.Things.Add(thing);
+    await context.SaveChangesAsync();
     return Results.CreatedAtRoute("GetThing", new {id = thing.Id}, thing);
 });
 // .WithParameterValidation();
+// for some reason MinimalApis.Extensions says it is incompatible with all my frameworks...
 
-app.MapPut("/api/thing", (Thing UpdatedThing) => 
+// PUT
+app.MapPut("/api/thing", async (Thing UpdatedThing, StoreDbContext context) => 
 {
     //update
-    Thing? prevThing = Things.Find(Th => Th.Id == UpdatedThing.Id );
-    if (prevThing is null)
-    {
-        Things.Add(UpdatedThing);
-        return Results.CreatedAtRoute("GetThing", new {id = UpdatedThing.Id}, UpdatedThing);
-    }
-    prevThing.Name = UpdatedThing.Name;
-    prevThing.Description = UpdatedThing.Description;
-    return Results.NoContent();
+    var RowsAffected = await context.Things.Where(th => th.Id == UpdatedThing.Id)
+        .ExecuteUpdateAsync(updates  =>  updates.SetProperty(th => th.Name, UpdatedThing.Name)
+                                                .SetProperty(th => th.Description, UpdatedThing.Description)
+        );
+    return RowsAffected == 0?Results.NotFound(): Results.NoContent();
 });
 
-app.MapDelete("/api/thing/{Id}", (int Id) =>
+// DELETE
+app.MapDelete("/api/thing/{Id}", async (int Id, StoreDbContext context) =>
 {
     //delete
-    Thing? ToDelete = Things.Find(Th => Th.Id == Id);
-    if( ToDelete is null)
-    {
-        return Results.NotFound();
-    }
-    Things.Remove(ToDelete);
-    return Results.NoContent();
+    var RowsAffected = await context.Things.Where(th => th.Id == Id)
+        .ExecuteDeleteAsync();
+    return RowsAffected == 0?Results.NotFound(): Results.NoContent();
 });
 
 app.Run();
